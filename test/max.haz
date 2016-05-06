@@ -1,0 +1,6 @@
+max = f(x) ->
+      f (y) ->
+      y (if x < y)
+      x (otherwise)
+
+print(max 1 2)

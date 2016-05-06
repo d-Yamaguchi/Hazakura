@@ -1,0 +1,5 @@
+fibo = f(x) ->
+       x  (if x < 3)
+       (f (x-1)) + f (x-2) (otherwise)
+
+print(fibo 40)

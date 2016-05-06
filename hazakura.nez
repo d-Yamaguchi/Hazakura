@@ -1,0 +1,53 @@
+//the latest version.
+source = { Space*  $(Expression) _ (('\r\n' / '\n') _ Space+ $(Expression) )* #Source}
+
+Expression = NameBind / InOut
+
+InOut = { 'print(' $target(OPerator) ')' #Out} / { $target(name) _ '=' _ 'read' #In}
+
+Value = numeral / false / true
+
+Variable =  name
+
+NameBind = { $name(name) _ '=' _ $exp(Bind) #NameBind}
+
+Bind = LambdaFunc / OPerator
+
+LambdaFunc = { 'f' Space? '(' _ $arg(name) _ ')' Space '->' Space _ $expression(Conditional) #Func}
+
+Apply = (LambdaFunc / Variable) {$func ' '+ $arg(Bind) #Apply}*
+
+OPerator = OPerator1 {$left ( _ ('&&' #And / '||' #Or) _ $right(OPerator1)) }*
+OPerator1 = OPerator2 {$left ( _ ('==' #Equals / '!=' #NotEquals) _ $right(OPerator2)) }*
+OPerator2 = OPerator3 {$left ( _ ('<=' #LessThanEquals / '<' #LessThan / '>=' #GreaterThanEquals / '>' #GreaterThan) _ $right(OPerator3)) }*
+OPerator3 = OPerator4 {$left ( _ ('+' #Add / '-' #Sub) _ $right(OPerator4)) }*
+OPerator4 = OPerator5 {$left ( _ ('*' #Mul) _ $right(OPerator5)) }*
+OPerator5 = Apply / Value / Variable / Minus / Group
+
+Minus = {'-' $expression(Group / Apply / Value / Variable / Minus) #Minus}
+
+Group = '('_ OPerator _')' / '$' _ OPerator
+
+Conditional = { $trueReturn(TrueReturn)* $othwiseret(Bind) (Space? _ '(otherwise)')? #Conditional}
+TrueReturn = { $return(Bind) _ '(if' _ $condition(OPerator) _ ')' Space _  #Truereturn}
+
+//tarminal element
+numeral = integer
+integer = {([1-9] [0-9]* / '0') #Int}
+false = {'false' #False}
+true = {'true' #True}
+
+// keywords
+keyword = 'otherwise'
+        / 'Int'
+        / 'Bool'
+        / 'true'
+        / 'false'
+        / 'if'
+        / 'print'
+        / 'read'
+
+name = { !keyword ([a-z] / [A-Z])+ ([0-9] / [a-z] / [A-Z] / '_')* #Name}
+
+Space = [ \t\n\r]
+_ = [ \t]*
